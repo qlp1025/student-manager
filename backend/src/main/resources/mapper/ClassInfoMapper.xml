@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.student.mapper.ClassInfoMapper">
+    <resultMap id="BaseResultMap" type="com.student.entity.ClassInfo">
+        <id column="id" property="id"/>
+        <result column="class_name" property="className"/>
+        <result column="grade" property="grade"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="student_count" property="studentCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithTeacher" type="com.student.entity.ClassInfo" extends="BaseResultMap">
+        <result column="teacher_name" property="teacherName"/>
+    </resultMap>
+
+    <select id="findById" resultMap="ResultMapWithTeacher">
+        SELECT c.*, u.real_name as teacher_name
+        FROM class_info c
+        LEFT JOIN sys_user u ON c.teacher_id = u.id
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="ResultMapWithTeacher">
+        SELECT c.*, u.real_name as teacher_name
+        FROM class_info c
+        LEFT JOIN sys_user u ON c.teacher_id = u.id
+        ORDER BY c.grade, c.class_name
+    </select>
+
+    <select id="findByGrade" resultMap="ResultMapWithTeacher">
+        SELECT c.*, u.real_name as teacher_name
+        FROM class_info c
+        LEFT JOIN sys_user u ON c.teacher_id = u.id
+        WHERE c.grade = #{grade}
+        ORDER BY c.class_name
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO class_info (class_name, grade, teacher_id, student_count)
+        VALUES (#{className}, #{grade}, #{teacherId}, #{studentCount})
+    </insert>
+
+    <update id="update">
+        UPDATE class_info
+        SET class_name = #{className},
+            grade = #{grade},
+            teacher_id = #{teacherId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM class_info WHERE id = #{id}
+    </delete>
+
+    <update id="updateStudentCount">
+        UPDATE class_info SET student_count = #{count} WHERE id = #{id}
+    </update>
+</mapper>

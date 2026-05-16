@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.student.mapper.SubjectMapper">
+    <resultMap id="BaseResultMap" type="com.student.entity.Subject">
+        <id column="id" property="id"/>
+        <result column="subject_name" property="subjectName"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithTeacher" type="com.student.entity.Subject" extends="BaseResultMap">
+        <result column="teacher_name" property="teacherName"/>
+    </resultMap>
+
+    <select id="findById" resultMap="ResultMapWithTeacher">
+        SELECT s.*, u.real_name as teacher_name
+        FROM subject s
+        LEFT JOIN sys_user u ON s.teacher_id = u.id
+        WHERE s.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="ResultMapWithTeacher">
+        SELECT s.*, u.real_name as teacher_name
+        FROM subject s
+        LEFT JOIN sys_user u ON s.teacher_id = u.id
+        ORDER BY s.id
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO subject (subject_name, teacher_id)
+        VALUES (#{subjectName}, #{teacherId})
+    </insert>
+
+    <update id="update">
+        UPDATE subject
+        SET subject_name = #{subjectName},
+            teacher_id = #{teacherId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM subject WHERE id = #{id}
+    </delete>
+</mapper>

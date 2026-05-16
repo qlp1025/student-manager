@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.student.mapper.ScoreInfoMapper">
+    <resultMap id="BaseResultMap" type="com.student.entity.ScoreInfo">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="subject_id" property="subjectId"/>
+        <result column="score" property="score"/>
+        <result column="exam_date" property="examDate"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithDetail" type="com.student.entity.ScoreInfo" extends="BaseResultMap">
+        <result column="student_name" property="studentName"/>
+        <result column="student_no" property="studentNo"/>
+        <result column="class_name" property="className"/>
+        <result column="subject_name" property="subjectName"/>
+    </resultMap>
+
+    <select id="findById" resultMap="ResultMapWithDetail">
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name
+        FROM score_info sc
+        LEFT JOIN student_info s ON sc.student_id = s.id
+        LEFT JOIN class_info c ON s.class_id = c.id
+        LEFT JOIN subject sub ON sc.subject_id = sub.id
+        WHERE sc.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="ResultMapWithDetail">
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name
+        FROM score_info sc
+        LEFT JOIN student_info s ON sc.student_id = s.id
+        LEFT JOIN class_info c ON s.class_id = c.id
+        LEFT JOIN subject sub ON sc.subject_id = sub.id
+        ORDER BY sc.create_time DESC
+    </select>
+
+    <select id="findByStudentId" resultMap="ResultMapWithDetail">
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name
+        FROM score_info sc
+        LEFT JOIN student_info s ON sc.student_id = s.id
+        LEFT JOIN class_info c ON s.class_id = c.id
+        LEFT JOIN subject sub ON sc.subject_id = sub.id
+        WHERE sc.student_id = #{studentId}
+        ORDER BY sc.exam_date DESC
+    </select>
+
+    <select id="findByCondition" resultMap="ResultMapWithDetail">
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name
+        FROM score_info sc
+        LEFT JOIN student_info s ON sc.student_id = s.id
+        LEFT JOIN class_info c ON s.class_id = c.id
+        LEFT JOIN subject sub ON sc.subject_id = sub.id
+        WHERE 1=1 AND sc.status = 1
+        <if test="studentId != null">
+            AND sc.student_id = #{studentId}
+        </if>
+        <if test="classId != null">
+            AND s.class_id = #{classId}
+        </if>
+        <if test="subjectId != null">
+            AND sc.subject_id = #{subjectId}
+        </if>
+        <if test="subjectIds != null and subjectIds.size() > 0">
+            AND sc.subject_id IN
+            <foreach collection="subjectIds" item="sid" open="(" separator="," close=")">
+                #{sid}
+            </foreach>
+        </if>
+        <if test="minScore != null">
+            AND sc.score >= #{minScore}
+        </if>
+        <if test="maxScore != null">
+            AND sc.score &lt;= #{maxScore}
+        </if>
+        ORDER BY sc.exam_date DESC, sc.create_time DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO score_info (student_id, subject_id, score, exam_date, status)
+        VALUES (#{studentId}, #{subjectId}, #{score}, #{examDate}, #{status})
+    </insert>
+
+    <update id="update">
+        UPDATE score_info
+        SET student_id = #{studentId},
+            subject_id = #{subjectId},
+            score = #{score},
+            exam_date = #{examDate},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE score_info SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM score_info WHERE id = #{id}
+    </delete>
+
+    <insert id="batchInsert">
+        INSERT INTO score_info (student_id, subject_id, score, exam_date, status) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.studentId}, #{item.subjectId}, #{item.score}, #{item.examDate}, #{item.status})
+        </foreach>
+    </insert>
+
+    <select id="getTotalScoreByStudentId" resultType="java.math.BigDecimal">
+        SELECT SUM(score) FROM score_info
+        WHERE student_id = #{studentId} AND status = 1
+    </select>
+
+    <select id="findStudentRanking" resultMap="ResultMapWithDetail">
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name,
+               (SELECT SUM(score) FROM score_info WHERE student_id = sc.student_id AND status = 1) as total_score
+        FROM score_info sc
+        LEFT JOIN student_info s ON sc.student_id = s.id
+        LEFT JOIN class_info c ON s.class_id = c.id
+        LEFT JOIN subject sub ON sc.subject_id = sub.id
+        WHERE 1=1 AND sc.status = 1
+        <if test="classId != null">
+            AND s.class_id = #{classId}
+        </if>
+        <if test="subjectIds != null and subjectIds.size() > 0">
+            AND sc.subject_id IN
+            <foreach collection="subjectIds" item="sid" open="(" separator="," close=")">
+                #{sid}
+            </foreach>
+        </if>
+        ORDER BY total_score DESC
+    </select>
+</mapper>

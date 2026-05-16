@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.student.mapper.SysUserMapper">
+    <resultMap id="BaseResultMap" type="com.student.entity.SysUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="real_name" property="realName"/>
+        <result column="role_id" property="roleId"/>
+        <result column="status" property="status"/>
+        <result column="avatar" property="avatar"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithRole" type="com.student.entity.SysUser" extends="BaseResultMap">
+        <result column="role_name" property="roleName"/>
+        <result column="role_key" property="roleKey"/>
+    </resultMap>
+
+    <select id="findByUsername" resultMap="ResultMapWithRole">
+        SELECT u.*, r.role_name, r.role_key
+        FROM sys_user u
+        LEFT JOIN sys_role r ON u.role_id = r.id
+        WHERE u.username = #{username}
+    </select>
+
+    <select id="findById" resultMap="ResultMapWithRole">
+        SELECT u.*, r.role_name, r.role_key
+        FROM sys_user u
+        LEFT JOIN sys_role r ON u.role_id = r.id
+        WHERE u.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="ResultMapWithRole">
+        SELECT u.*, r.role_name, r.role_key
+        FROM sys_user u
+        LEFT JOIN sys_role r ON u.role_id = r.id
+        ORDER BY u.create_time DESC
+    </select>
+
+    <select id="findByRoleId" resultMap="BaseResultMap">
+        SELECT * FROM sys_user WHERE role_id = #{roleId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password, real_name, role_id, status, avatar, phone, email)
+        VALUES (#{username}, #{password}, #{realName}, #{roleId}, #{status}, #{avatar}, #{phone}, #{email})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user
+        SET real_name = #{realName},
+            role_id = #{roleId},
+            status = #{status},
+            avatar = #{avatar},
+            phone = #{phone},
+            email = #{email}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE sys_user SET password = #{password} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_user WHERE id = #{id}
+    </delete>
+
+    <delete id="batchDelete">
+        DELETE FROM sys_user WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

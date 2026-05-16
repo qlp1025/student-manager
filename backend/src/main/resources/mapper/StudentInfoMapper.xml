@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.student.mapper.StudentInfoMapper">
+    <resultMap id="BaseResultMap" type="com.student.entity.StudentInfo">
+        <id column="id" property="id"/>
+        <result column="student_no" property="studentNo"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="age" property="age"/>
+        <result column="class_id" property="classId"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="enroll_date" property="enrollDate"/>
+        <result column="id_card" property="idCard"/>
+        <result column="father_name" property="fatherName"/>
+        <result column="father_phone" property="fatherPhone"/>
+        <result column="father_id_card" property="fatherIdCard"/>
+        <result column="mother_name" property="motherName"/>
+        <result column="mother_phone" property="motherPhone"/>
+        <result column="mother_id_card" property="motherIdCard"/>
+        <result column="remark" property="remark"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithClass" type="com.student.entity.StudentInfo" extends="BaseResultMap">
+        <result column="class_name" property="className"/>
+    </resultMap>
+
+    <select id="findById" resultMap="ResultMapWithClass">
+        SELECT s.*, c.class_name,
+            CASE s.gender WHEN 1 THEN '男' ELSE '女' END as gender_name
+        FROM student_info s
+        LEFT JOIN class_info c ON s.class_id = c.id
+        WHERE s.id = #{id}
+    </select>
+
+    <select id="findByStudentNo" resultMap="BaseResultMap">
+        SELECT * FROM student_info WHERE student_no = #{studentNo}
+    </select>
+
+    <select id="findAll" resultMap="ResultMapWithClass">
+        SELECT s.*, c.class_name,
+            CASE s.gender WHEN 1 THEN '男' ELSE '女' END as gender_name
+        FROM student_info s
+        LEFT JOIN class_info c ON s.class_id = c.id
+        ORDER BY s.create_time DESC
+    </select>
+
+    <select id="findByCondition" resultMap="ResultMapWithClass">
+        SELECT s.*, c.class_name,
+            CASE s.gender WHEN 1 THEN '男' ELSE '女' END as gender_name
+        FROM student_info s
+        LEFT JOIN class_info c ON s.class_id = c.id
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (s.name LIKE CONCAT('%', #{keyword}, '%') OR s.student_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="classId != null">
+            AND s.class_id = #{classId}
+        </if>
+        <if test="status != null">
+            AND s.status = #{status}
+        </if>
+        ORDER BY s.create_time DESC
+    </select>
+
+    <select id="findByClassId" resultMap="ResultMapWithClass">
+        SELECT s.*, c.class_name,
+            CASE s.gender WHEN 1 THEN '男' ELSE '女' END as gender_name
+        FROM student_info s
+        LEFT JOIN class_info c ON s.class_id = c.id
+        WHERE s.class_id = #{classId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_info (student_no, name, gender, age, class_id, phone, address,
+            enroll_date, id_card, father_name, father_phone, father_id_card,
+            mother_name, mother_phone, mother_id_card, remark, status)
+        VALUES (#{studentNo}, #{name}, #{gender}, #{age}, #{classId}, #{phone}, #{address},
+            #{enrollDate}, #{idCard}, #{fatherName}, #{fatherPhone}, #{fatherIdCard},
+            #{motherName}, #{motherPhone}, #{motherIdCard}, #{remark}, #{status})
+    </insert>
+
+    <update id="update">
+        UPDATE student_info
+        SET name = #{name}, gender = #{gender}, age = #{age}, class_id = #{classId},
+            phone = #{phone}, address = #{address}, enroll_date = #{enrollDate},
+            id_card = #{idCard}, father_name = #{fatherName}, father_phone = #{fatherPhone},
+            father_id_card = #{fatherIdCard}, mother_name = #{motherName},
+            mother_phone = #{motherPhone}, mother_id_card = #{motherIdCard},
+            remark = #{remark}, status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE student_info SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM student_info WHERE id = #{id}
+    </delete>
+
+    <delete id="batchDelete">
+        DELETE FROM student_info WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM student_info
+    </select>
+
+    <select id="countByClassId" resultType="int">
+        SELECT COUNT(*) FROM student_info WHERE class_id = #{classId}
+    </select>
+</mapper>
