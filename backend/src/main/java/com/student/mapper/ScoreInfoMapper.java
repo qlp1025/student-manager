@@ -13,7 +13,7 @@ public interface ScoreInfoMapper {
     List<ScoreInfo> findByStudentId(@Param("studentId") Long studentId);
     List<ScoreInfo> findByCondition(@Param("studentId") Long studentId, @Param("classId") Long classId,
                                      @Param("subjectId") Long subjectId, @Param("minScore") Double minScore,
-                                     @Param("maxScore") Double maxScore);
+                                     @Param("maxScore") Double maxScore, @Param("subjectIds")List<Long> subjectIds);
     int insert(ScoreInfo score);
     int update(ScoreInfo score);
     int updateStatus(@Param("id") Long id, @Param("status") Integer status);

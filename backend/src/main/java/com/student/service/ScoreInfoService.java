@@ -50,7 +50,8 @@ public class ScoreInfoService {
                 queryDTO.getClassId(),
                 queryDTO.getSubjectId(),
                 queryDTO.getMinScore(),
-                queryDTO.getMaxScore()
+                queryDTO.getMaxScore(),
+                queryDTO.getSubjectIds()
         );
     }
 
@@ -61,7 +62,8 @@ public class ScoreInfoService {
                 queryDTO.getClassId(),
                 queryDTO.getSubjectId(),
                 queryDTO.getMinScore(),
-                queryDTO.getMaxScore()
+                queryDTO.getMaxScore(),
+                queryDTO.getSubjectIds()
         );
         return new PageInfo<>(list);
     }
