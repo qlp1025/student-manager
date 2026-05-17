@@ -135,6 +135,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, Download } from '@element-plus/icons-vue'
 import axios from 'axios'
 import { useUserStore } from '../stores/user'
+import * as XLSX from 'xlsx'
 
 const userStore = useUserStore()
 const loading = ref(false)
@@ -146,6 +147,7 @@ const columnCount = ref(0)
 const importResult = ref(null)
 const dataDialogVisible = ref(false)
 const currentTable = ref('')
+const selectedFile = ref(null)
 
 const form = reactive({
   tableName: ''
@@ -155,9 +157,10 @@ const canImport = computed(() => {
   return form.tableName.trim() && columnCount.value > 0
 })
 
-const handleFileChange = (file) => {
+const handleFileChange = (file, fileList) => {
   columnCount.value = 0
   importResult.value = null
+  selectedFile.value = file.raw
 
   // 读取Excel获取列数
   const reader = new FileReader()
@@ -180,6 +183,7 @@ const handleFileChange = (file) => {
 const handleFileRemove = () => {
   columnCount.value = 0
   importResult.value = null
+  selectedFile.value = null
 }
 
 const handleImport = async () => {
@@ -188,8 +192,7 @@ const handleImport = async () => {
     return
   }
 
-  const file = uploadRef.value?.uploadFiles?.[0]?.raw
-  if (!file) {
+  if (!selectedFile.value) {
     ElMessage.warning('请上传Excel文件')
     return
   }
@@ -200,7 +203,7 @@ const handleImport = async () => {
   try {
     const formData = new FormData()
     formData.append('tableName', form.tableName.trim())
-    formData.append('file', file)
+    formData.append('file', selectedFile.value)
 
     const res = await axios.post('/api/import/createAndImport', formData, {
       headers: {
