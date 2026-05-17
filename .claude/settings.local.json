@@ -6,7 +6,8 @@
       "Bash(findstr \":8080\\\\|:5173\")",
       "Bash(findstr LISTENING)",
       "Bash(findstr \"8080\")",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "Bash(xxd)"
     ]
   }
 }

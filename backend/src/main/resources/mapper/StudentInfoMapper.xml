@@ -45,7 +45,8 @@
             CASE s.gender WHEN 1 THEN '男' ELSE '女' END as gender_name
         FROM student_info s
         LEFT JOIN class_info c ON s.class_id = c.id
-        ORDER BY s.create_time DESC
+        WHERE s.status = 1
+        ORDER BY s.student_no ASC
     </select>
 
     <select id="findByCondition" resultMap="ResultMapWithClass">

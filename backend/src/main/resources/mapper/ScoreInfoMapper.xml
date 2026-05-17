@@ -7,6 +7,7 @@
         <result column="subject_id" property="subjectId"/>
         <result column="score" property="score"/>
         <result column="exam_date" property="examDate"/>
+        <result column="exam_id" property="examId"/>
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -16,31 +17,41 @@
         <result column="student_name" property="studentName"/>
         <result column="student_no" property="studentNo"/>
         <result column="class_name" property="className"/>
+        <result column="s_class_id" property="classId"/>
         <result column="subject_name" property="subjectName"/>
+        <result column="exam_id" property="examId"/>
+        <result column="exam_name" property="examName"/>
     </resultMap>
 
     <select id="findById" resultMap="ResultMapWithDetail">
-        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, s.class_id as s_class_id, sub.subject_name, e.id as exam_id, e.exam_name
         FROM score_info sc
         LEFT JOIN student_info s ON sc.student_id = s.id
         LEFT JOIN class_info c ON s.class_id = c.id
         LEFT JOIN subject sub ON sc.subject_id = sub.id
+        LEFT JOIN exam e ON sc.exam_id = e.id
         WHERE sc.id = #{id}
     </select>
 
     <select id="findAll" resultMap="ResultMapWithDetail">
-        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, s.class_id as s_class_id, sub.subject_name, e.id as exam_id, e.exam_name
         FROM score_info sc
         LEFT JOIN student_info s ON sc.student_id = s.id
         LEFT JOIN class_info c ON s.class_id = c.id
         LEFT JOIN subject sub ON sc.subject_id = sub.id
-        ORDER BY sc.create_time DESC
+        LEFT JOIN exam e ON sc.exam_id = e.id
+        WHERE s.status = 1
+        ORDER BY s.student_no ASC, sc.exam_date DESC
     </select>
 
     <select id="findByStudentId" resultMap="ResultMapWithDetail">
-        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, s.class_id as s_class_id, sub.subject_name, e.id as exam_id, e.exam_name
         FROM score_info sc
         LEFT JOIN student_info s ON sc.student_id = s.id
+        LEFT JOIN class_info c ON s.class_id = c.id
+        LEFT JOIN subject sub ON sc.subject_id = sub.id
+        LEFT JOIN exam e ON sc.exam_id = e.id
+        WHERE s.status = 1
         LEFT JOIN class_info c ON s.class_id = c.id
         LEFT JOIN subject sub ON sc.subject_id = sub.id
         WHERE sc.student_id = #{studentId}
@@ -48,12 +59,13 @@
     </select>
 
     <select id="findByCondition" resultMap="ResultMapWithDetail">
-        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, s.class_id as s_class_id, sub.subject_name, e.id as exam_id, e.exam_name
         FROM score_info sc
         LEFT JOIN student_info s ON sc.student_id = s.id
         LEFT JOIN class_info c ON s.class_id = c.id
         LEFT JOIN subject sub ON sc.subject_id = sub.id
-        WHERE 1=1 AND sc.status = 1
+        LEFT JOIN exam e ON sc.exam_id = e.id
+        WHERE 1=1 AND sc.status = 1 AND s.status = 1
         <if test="studentId != null">
             AND sc.student_id = #{studentId}
         </if>
@@ -69,18 +81,24 @@
                 #{sid}
             </foreach>
         </if>
+        <if test="examId != null">
+            AND sc.exam_id = #{examId}
+        </if>
         <if test="minScore != null">
             AND sc.score >= #{minScore}
         </if>
         <if test="maxScore != null">
             AND sc.score &lt;= #{maxScore}
         </if>
-        ORDER BY sc.exam_date DESC, sc.create_time DESC
+        <if test="examDate != null">
+            AND sc.exam_date = #{examDate}
+        </if>
+        ORDER BY s.student_no ASC, sc.exam_date DESC
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO score_info (student_id, subject_id, score, exam_date, status)
-        VALUES (#{studentId}, #{subjectId}, #{score}, #{examDate}, #{status})
+        INSERT INTO score_info (student_id, subject_id, score, exam_date, exam_id, status)
+        VALUES (#{studentId}, #{subjectId}, #{score}, #{examDate}, #{examId}, #{status})
     </insert>
 
     <update id="update">
@@ -89,6 +107,7 @@
             subject_id = #{subjectId},
             score = #{score},
             exam_date = #{examDate},
+            exam_id = #{examId},
             status = #{status}
         WHERE id = #{id}
     </update>
@@ -102,9 +121,9 @@
     </delete>
 
     <insert id="batchInsert">
-        INSERT INTO score_info (student_id, subject_id, score, exam_date, status) VALUES
+        INSERT INTO score_info (student_id, subject_id, score, exam_date, exam_id, status) VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.studentId}, #{item.subjectId}, #{item.score}, #{item.examDate}, #{item.status})
+            (#{item.studentId}, #{item.subjectId}, #{item.score}, #{item.examDate}, #{item.examId}, #{item.status})
         </foreach>
     </insert>
 
@@ -114,7 +133,7 @@
     </select>
 
     <select id="findStudentRanking" resultMap="ResultMapWithDetail">
-        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, sub.subject_name,
+        SELECT sc.*, s.name as student_name, s.student_no, c.class_name, s.class_id as s_class_id, sub.subject_name,
                (SELECT SUM(score) FROM score_info WHERE student_id = sc.student_id AND status = 1) as total_score
         FROM score_info sc
         LEFT JOIN student_info s ON sc.student_id = s.id
@@ -131,5 +150,40 @@
             </foreach>
         </if>
         ORDER BY total_score DESC
+    </select>
+
+    <select id="findClassAvgByDate" resultMap="ResultMapWithDetail">
+        SELECT sc.exam_date, sc.subject_id, sub.subject_name,
+               AVG(sc.score) as score,
+               COUNT(DISTINCT sc.student_id) as studentCount,
+               s.class_id as s_class_id
+        FROM score_info sc
+        LEFT JOIN student_info s ON sc.student_id = s.id
+        LEFT JOIN subject sub ON sc.subject_id = sub.id
+        WHERE sc.status = 1 AND s.class_id = #{classId}
+        <if test="subjectIds != null and subjectIds.size() > 0">
+            AND sc.subject_id IN
+            <foreach collection="subjectIds" item="sid" open="(" separator="," close=")">
+                #{sid}
+            </foreach>
+        </if>
+        GROUP BY sc.exam_date, sc.subject_id, sub.subject_name, s.class_id
+        ORDER BY sc.exam_date ASC
+    </select>
+
+    <select id="findStudentScoreHistory" resultMap="ResultMapWithDetail">
+        SELECT sc.exam_date, sc.subject_id, sub.subject_name, sc.score,
+               s.class_id as s_class_id
+        FROM score_info sc
+        LEFT JOIN student_info s ON sc.student_id = s.id
+        LEFT JOIN subject sub ON sc.subject_id = sub.id
+        WHERE sc.student_id = #{studentId} AND sc.status = 1
+        <if test="subjectIds != null and subjectIds.size() > 0">
+            AND sc.subject_id IN
+            <foreach collection="subjectIds" item="sid" open="(" separator="," close=")">
+                #{sid}
+            </foreach>
+        </if>
+        ORDER BY sc.exam_date ASC, sc.subject_id ASC
     </select>
 </mapper>

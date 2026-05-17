@@ -13,6 +13,7 @@ public class ScoreQueryDTO {
     private Double minScore;
     private Double maxScore;
     private LocalDate examDate;
+    private Long examId;
     private Integer pageNum = 1;
     private Integer pageSize = 10;
 }

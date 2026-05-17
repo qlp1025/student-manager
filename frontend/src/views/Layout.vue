@@ -1,9 +1,9 @@
 <template>
   <el-container class="layout-container">
-    <el-aside width="220px" class="sidebar">
+    <el-aside :width="isCollapse ? '64px' : '220px'" class="sidebar">
       <div class="logo">
         <el-icon size="28"><School /></el-icon>
-        <span>学生管理</span>
+        <span v-if="!isCollapse">学生管理</span>
       </div>
       <el-menu
         :default-active="activeMenu"
@@ -12,6 +12,8 @@
         text-color="#909399"
         active-text-color="#409EFF"
         :router="true"
+        :collapse="isCollapse"
+        :collapse-transition="false"
       >
         <el-menu-item index="/home">
           <el-icon><HomeFilled /></el-icon>
@@ -37,6 +39,14 @@
           <el-icon><Bell /></el-icon>
           <span>公告管理</span>
         </el-menu-item>
+        <el-menu-item index="/statistics">
+          <el-icon><DataAnalysis /></el-icon>
+          <span>成绩统计</span>
+        </el-menu-item>
+        <el-menu-item index="/exam" v-if="userStore.isAdmin">
+          <el-icon><Document /></el-icon>
+          <span>试题管理</span>
+        </el-menu-item>
         <el-sub-menu index="system" v-if="userStore.isAdmin">
           <template #title>
             <el-icon><Setting /></el-icon>
@@ -45,6 +55,7 @@
           <el-menu-item index="/system/import">数据导入</el-menu-item>
           <el-menu-item index="/system/user">用户管理</el-menu-item>
           <el-menu-item index="/system/log">操作日志</el-menu-item>
+          <el-menu-item index="/system/database">数据库查询</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>
@@ -52,7 +63,10 @@
     <el-container>
       <el-header class="header">
         <div class="header-left">
-          <el-breadcrumb separator="/">
+          <el-button text @click="isCollapse = !isCollapse">
+            <el-icon size="20"><Fold v-if="!isCollapse" /><Expand v-else /></el-icon>
+          </el-button>
+          <el-breadcrumb separator="/" style="margin-left: 10px">
             <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item v-if="$route.meta.title !== '首页'">
               {{ $route.meta.title }}
@@ -91,12 +105,14 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
+import { Fold, Expand } from '@element-plus/icons-vue'
 import { useUserStore } from '../stores/user'
 import { userApi } from '../api/student'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const isCollapse = ref(false)
 
 const activeMenu = computed(() => route.path)
 
@@ -155,6 +171,10 @@ const showPasswordDialog = () => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.logo span {
+  white-space: nowrap;
+}
+
 .sidebar-menu {
   border-right: none;
   background: transparent;
@@ -175,6 +195,10 @@ const showPasswordDialog = () => {
 
 .sidebar-menu .el-menu-item.is-active {
   background: rgba(64, 158, 255, 0.15);
+}
+
+.sidebar-menu.el-menu--collapse .el-menu-item span {
+  display: none;
 }
 
 .header {

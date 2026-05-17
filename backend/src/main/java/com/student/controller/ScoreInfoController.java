@@ -66,6 +66,22 @@ public class ScoreInfoController {
         return ApiResponse.success(scoreService.findRanking(classId, subjectIds));
     }
 
+    @GetMapping("/stats/student/{studentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    public ApiResponse<List<ScoreInfo>> getStudentScoreStats(
+            @PathVariable Long studentId,
+            @RequestParam(required = false) List<Long> subjectIds) {
+        return ApiResponse.success(scoreService.getStudentScoreHistory(studentId, subjectIds));
+    }
+
+    @GetMapping("/stats/class/{classId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ApiResponse<List<ScoreInfo>> getClassScoreStats(
+            @PathVariable Long classId,
+            @RequestParam(required = false) List<Long> subjectIds) {
+        return ApiResponse.success(scoreService.getClassScoreStats(classId, subjectIds));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ApiResponse<String> add(@RequestBody ScoreInfo score) {

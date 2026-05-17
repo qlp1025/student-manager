@@ -50,7 +50,17 @@ export const scoreApi = {
   update: (data) => request.put('/score', data),
   updateStatus: (id, status) => request.put(`/score/status/${id}`, null, { params: { status } }),
   delete: (id) => request.delete(`/score/${id}`),
-  export: (params) => request.get('/score/export', { params, responseType: 'blob' })
+  export: (params) => request.get('/score/export', { params, responseType: 'blob' }),
+  getStudentStats: (studentId, subjectIds) => request.get(`/score/stats/student/${studentId}`, { params: { subjectIds } }),
+  getClassStats: (classId, subjectIds) => request.get(`/score/stats/class/${classId}`, { params: { subjectIds } })
+}
+
+export const examApi = {
+  list: () => request.get('/exam/list'),
+  getById: (id) => request.get(`/exam/${id}`),
+  add: (data) => request.post('/exam', data),
+  update: (data) => request.put('/exam', data),
+  delete: (id) => request.delete(`/exam/${id}`)
 }
 
 export const noticeApi = {

@@ -66,6 +66,24 @@ const routes = [
         name: 'SystemLog',
         component: () => import('../views/SystemLog.vue'),
         meta: { title: '操作日志', roles: ['admin'] }
+      },
+      {
+        path: 'system/database',
+        name: 'Database',
+        component: () => import('../views/Database.vue'),
+        meta: { title: '数据库查询', roles: ['admin'] }
+      },
+      {
+        path: 'statistics',
+        name: 'Statistics',
+        component: () => import('../views/Statistics.vue'),
+        meta: { title: '成绩统计', roles: ['admin', 'teacher'] }
+      },
+      {
+        path: 'exam',
+        name: 'Exam',
+        component: () => import('../views/Exam.vue'),
+        meta: { title: '试题管理', roles: ['admin'] }
       }
     ]
   }

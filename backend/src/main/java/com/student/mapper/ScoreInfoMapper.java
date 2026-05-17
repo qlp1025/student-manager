@@ -3,6 +3,7 @@ package com.student.mapper;
 import com.student.entity.ScoreInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import java.time.LocalDate;
 import java.util.List;
 import java.math.BigDecimal;
 
@@ -13,7 +14,8 @@ public interface ScoreInfoMapper {
     List<ScoreInfo> findByStudentId(@Param("studentId") Long studentId);
     List<ScoreInfo> findByCondition(@Param("studentId") Long studentId, @Param("classId") Long classId,
                                      @Param("subjectId") Long subjectId, @Param("minScore") Double minScore,
-                                     @Param("maxScore") Double maxScore, @Param("subjectIds")List<Long> subjectIds);
+                                     @Param("maxScore") Double maxScore, @Param("subjectIds") List<Long> subjectIds,
+                                     @Param("examDate") LocalDate examDate);
     int insert(ScoreInfo score);
     int update(ScoreInfo score);
     int updateStatus(@Param("id") Long id, @Param("status") Integer status);
@@ -21,4 +23,6 @@ public interface ScoreInfoMapper {
     int batchInsert(@Param("list") List<ScoreInfo> scores);
     BigDecimal getTotalScoreByStudentId(@Param("studentId") Long studentId);
     List<ScoreInfo> findStudentRanking(@Param("classId") Long classId, @Param("subjectIds") List<Long> subjectIds);
+    List<ScoreInfo> findClassAvgByDate(@Param("classId") Long classId, @Param("subjectIds") List<Long> subjectIds);
+    List<ScoreInfo> findStudentScoreHistory(@Param("studentId") Long studentId, @Param("subjectIds") List<Long> subjectIds);
 }

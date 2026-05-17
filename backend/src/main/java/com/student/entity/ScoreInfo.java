@@ -20,7 +20,10 @@ public class ScoreInfo {
     private String studentName;
     private String studentNo;
     private String className;
+    private Long classId;
     private String subjectName;
     private BigDecimal totalScore;
     private Integer rank;
+    private Long examId;
+    private String examName;
 }

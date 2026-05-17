@@ -51,7 +51,8 @@ public class ScoreInfoService {
                 queryDTO.getSubjectId(),
                 queryDTO.getMinScore(),
                 queryDTO.getMaxScore(),
-                queryDTO.getSubjectIds()
+                queryDTO.getSubjectIds(),
+                queryDTO.getExamDate()
         );
     }
 
@@ -63,7 +64,8 @@ public class ScoreInfoService {
                 queryDTO.getSubjectId(),
                 queryDTO.getMinScore(),
                 queryDTO.getMaxScore(),
-                queryDTO.getSubjectIds()
+                queryDTO.getSubjectIds(),
+                queryDTO.getExamDate()
         );
         return new PageInfo<>(list);
     }
@@ -99,6 +101,14 @@ public class ScoreInfoService {
 
     public List<ScoreInfo> findRanking(Long classId, List<Long> subjectIds) {
         return scoreMapper.findStudentRanking(classId, subjectIds);
+    }
+
+    public List<ScoreInfo> getStudentScoreHistory(Long studentId, List<Long> subjectIds) {
+        return scoreMapper.findStudentScoreHistory(studentId, subjectIds);
+    }
+
+    public List<ScoreInfo> getClassScoreStats(Long classId, List<Long> subjectIds) {
+        return scoreMapper.findClassAvgByDate(classId, subjectIds);
     }
 
     @Transactional
