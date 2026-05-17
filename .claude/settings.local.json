@@ -7,7 +7,8 @@
       "Bash(findstr LISTENING)",
       "Bash(findstr \"8080\")",
       "Bash(powershell *)",
-      "Bash(xxd)"
+      "Bash(xxd)",
+      "Bash(mvn clean *)"
     ]
   }
 }
